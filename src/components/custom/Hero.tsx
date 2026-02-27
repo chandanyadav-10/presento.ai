@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "../ui/button";
 import { HeroVideoDialog } from "../ui/hero-video-dialog";
 import { SignInButton, useUser } from "@clerk/clerk-react";
+import { Link } from "react-router-dom";
 
 function Hero() {
   const { user } = useUser();
@@ -29,7 +30,9 @@ function Hero() {
             <Button size={"lg"}>Get Started</Button>
           </SignInButton>
         ) : (
-          <Button size={"lg"}>Go to Workspace</Button>
+          <Link to="/workspace">
+            <Button size={"lg"}>Go to Workspace</Button>
+          </Link>
         )}
       </div>
 

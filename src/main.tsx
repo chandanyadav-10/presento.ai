@@ -5,7 +5,7 @@ import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Workspace from "./workspace/index.tsx";
 import Project from "./workspace/project/index.tsx";
-import { ClerkProvider } from '@clerk/clerk-react';
+import { ClerkProvider } from "@clerk/clerk-react";
 
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
