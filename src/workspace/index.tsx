@@ -1,15 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/clerk-react";
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { firebaseDb } from "./../../config/FirebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { UserDetailContext } from "./../../context/UserDetailContext";
+import { set } from "date-fns";
 
 function Workspace() {
   const { user, isLoaded } = useUser();
+  const {userDetail, setUserDetail} = useContext(UserDetailContext);
 
   useEffect(() => {
-    user&&CreateNewUser();
+    user && CreateNewUser();
   }, [user]);
 
   const CreateNewUser = async () => {
@@ -24,8 +27,15 @@ function Workspace() {
 
       if (docSnap.exists()) {
         console.log("Document data:", docSnap.data());
+        setUserDetail(docSnap.data());
       } else {
-        // insert new use
+        const data = {
+          fullName: user?.fullName,
+          email: user?.primaryEmailAddress?.emailAddress,
+          createdAt: new Date(),
+          credits: 10,
+        };
+        // insert new user
         await setDoc(
           doc(
             firebaseDb,
@@ -33,32 +43,30 @@ function Workspace() {
             user?.primaryEmailAddress?.emailAddress ?? "",
           ),
           {
-            fullName: user?.fullName,
-            email: user?.primaryEmailAddress?.emailAddress,
-            createdAt: new Date(),
-            credits: 10,
+            ...data,
           },
         );
+        setUserDetail(data);
       }
     }
+  };
 
-    if (!user && isLoaded) {
-      return (
-        <div>
-          Please sign in to access the workspace.
-          <Link to={"/"}>
-            <Button>Sign In</Button>
-          </Link>
-        </div>
-      );
-    }
+  if (!user && isLoaded) {
     return (
       <div>
-        Workspace
-        <Outlet />
+        Please sign in to access the workspace.
+        <Link to={"/"}>
+          <Button>Sign In</Button>
+        </Link>
       </div>
     );
-  };
+  }
+  return (
+    <div>
+      Workspace
+      <Outlet />
+    </div>
+  );
 }
 
 export default Workspace;

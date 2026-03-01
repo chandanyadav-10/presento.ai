@@ -1,4 +1,4 @@
-import { Children, StrictMode } from "react";
+import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
@@ -6,6 +6,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Workspace from "./workspace/index.tsx";
 import Project from "./workspace/project/index.tsx";
 import { ClerkProvider } from "@clerk/clerk-react";
+import {UserDetailContext} from "./../context/UserDetailContext.tsx";
+
 
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -23,10 +25,18 @@ if (!PUBLISHABLE_KEY) {
   throw new Error("Add your Clerk Publishable Key to the .env file");
 }
 
+function Root() {
+  const [userDetail, setUserDetail] = useState();
+  return(
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <UserDetailContext.Provider value={{userDetail, setUserDetail}}>
+      <RouterProvider router={router} />
+      </UserDetailContext.Provider>
+    </ClerkProvider>
+  )
+}
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <RouterProvider router={router} />
-    </ClerkProvider>
+    <Root />
   </StrictMode>,
 );
