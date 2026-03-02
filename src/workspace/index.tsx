@@ -1,15 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/clerk-react";
-import React, { useContext, useEffect } from "react";
-import { Link, Outlet } from "react-router-dom";
+import React, { use, useContext, useEffect } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { firebaseDb } from "./../../config/FirebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { UserDetailContext } from "./../../context/UserDetailContext";
 import { set } from "date-fns";
+import Header from "@/components/custom/Header";
+import PromptBox from "@/components/custom/PromptBox";
+import MyProjects from "@/components/custom/MyProjects";
 
 function Workspace() {
   const { user, isLoaded } = useUser();
-  const {userDetail, setUserDetail} = useContext(UserDetailContext);
+  const { userDetail, setUserDetail } = useContext(UserDetailContext);
+  const location = useLocation();
 
   useEffect(() => {
     user && CreateNewUser();
@@ -63,7 +67,11 @@ function Workspace() {
   }
   return (
     <div>
-      Workspace
+      <Header />
+      {location.pathname === "/workspace" && <div>
+        <PromptBox />
+        <MyProjects />
+        </div>}
       <Outlet />
     </div>
   );
