@@ -4,9 +4,9 @@ import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Workspace from "./workspace/index.tsx";
-import Project from "./workspace/project/index.tsx";
 import { ClerkProvider } from "@clerk/clerk-react";
 import {UserDetailContext} from "./../context/UserDetailContext.tsx";
+import Outline from "./workspace/project/outline/index.tsx";
 
 
 const router = createBrowserRouter([
@@ -14,7 +14,7 @@ const router = createBrowserRouter([
   {
     path: "/workspace",
     element: <Workspace />,
-    children: [{ path: "project/:projectId", element: <Project /> }],
+    children: [{ path: "project/:projectId/outline", element: <Outline /> }],
   },
 ]);
 

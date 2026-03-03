@@ -9,7 +9,7 @@ import { UserDetailContext } from "./../../../context/UserDetailContext";
 function Header() {
   const { user } = useUser();
   const location = useLocation();
-  const {userDetail, setUserDetail} = useContext(UserDetailContext);
+  const { userDetail, setUserDetail } = useContext(UserDetailContext);
 
   console.log(location.pathname);
   return (
@@ -24,7 +24,7 @@ function Header() {
           <UserButton />
           {location.pathname.includes("workspace") ? (
             <div className="flex gap-2 items-center p-2 px-3 bg-orange-100 rounded-full">
-              <Gem/> {userDetail?.credits?? 0}
+              <Gem /> {userDetail?.credits ?? 0}
             </div>
           ) : (
             <Link to="/workspace">
