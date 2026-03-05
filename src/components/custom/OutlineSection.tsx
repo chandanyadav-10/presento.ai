@@ -2,14 +2,16 @@ import React from "react";
 import { Skeleton } from "../ui/skeleton";
 import type { Outline } from "@/workspace/project/outline";
 import { Button } from "../ui/button";
-import { Edit, Ghost } from "lucide-react";
+import { ArrowRight, Edit, Ghost, Sparkle } from "lucide-react";
+import EditOutlineDialog from "./EditOutlineDialog";
 
 type Props = {
-  loading: boolean;
-  outline: Outline[];
+  loading: boolean,
+  outline: Outline[],
+  handleUpdateOutline: any
 };
 
-function OutlineSection({ loading, outline }: Props) {
+function OutlineSection({ loading, outline, handleUpdateOutline }: Props) {
   return (
     <div className="mt-7">
       <h2 className="font-bold text-xl">Sliders Outline</h2>
@@ -24,20 +26,28 @@ function OutlineSection({ loading, outline }: Props) {
         </div>
       )}
 
-      <div>
+      <div className="mb-24">
         {outline?.map((item, index) => (
-          <div key={index} className="bg-white p-3 rounded-xl flex gap-6 items-center border mt-5 justify-between px-6">
+          <div
+            key={index}
+            className="bg-white p-3 rounded-xl flex gap-6 items-center border mt-5 justify-between px-6"
+          >
             <div className="flex gap-6 items-center">
-            <h2 className="font-bold p-5 bg-gray-200 rounded-xl">{index + 1}</h2>
-            <div>
-              <h2 className="font-bold">{item.slidePoint}</h2>
-              <p>{item.outline}</p>
+              <h2 className="font-bold p-5 bg-gray-200 rounded-xl">
+                {index + 1}
+              </h2>
+              <div>
+                <h2 className="font-bold text-lg">{item.slidePoint}</h2>
+                <p className="text-gray-500">{item.outline}</p>
+              </div>
             </div>
-            </div>
-            <Button variant={'ghost'} size={'icon-lg'}><Edit/></Button>
+            <EditOutlineDialog outlineData={item} onUpdate={handleUpdateOutline}>
+              <Button variant={"ghost"} size={"icon-lg"}><Edit /></Button>
+            </EditOutlineDialog>
           </div>
         ))}
       </div>
+     
     </div>
   );
 }

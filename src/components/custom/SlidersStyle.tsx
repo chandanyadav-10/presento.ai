@@ -5,6 +5,7 @@ import DarkSlider from "./../../assets/dark.jpg";
 import PastelSlider from "./../../assets/pastel-ppt.jpg";
 import MinWhiteSlider from "./../../assets/Minimalist-White.jpg";
 import TechSlider from "./../../assets/tech.jpg";
+import { de } from "date-fns/locale";
 
 const Design_Styles = [
   {
@@ -92,14 +93,33 @@ const Design_Styles = [
     bannerImage: TechSlider,
   },
 ];
-function SlidersStyle() {
+
+type Props = {
+  selectStyle: any;
+};
+export type DesignStyle = {
+  styleName: string,
+  colors: any,
+  designGuide: string,
+  icon: string,
+  bannerImage: any
+};
+
+function SlidersStyle({ selectStyle }: Props) {
   const [selectedStyle, setSelectedStyle] = useState<string>();
   return (
     <div className="mt-5">
       <h2 className="font-bold text-xl">Select Slider Style </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-5 mt-5">
         {Design_Styles.map((design, index) => (
-          <div key={index} className={`cursor-pointer ${selectedStyle === design.styleName ? 'p-2 border-2 border-primary rounded-2xl' : ''}`} onClick={()=>setSelectedStyle(design.styleName)}>
+          <div
+            key={index}
+            className={`cursor-pointer ${selectedStyle === design.styleName ? "p-2 border-2 border-primary rounded-2xl" : ""}`}
+            onClick={() => {
+              setSelectedStyle(design.styleName);
+              selectStyle(design);
+            }}
+          >
             <img
               src={design.bannerImage}
               alt={design.styleName}
