@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAI, getGenerativeModel, GoogleAIBackend } from "firebase/ai";
+import { getAI, getGenerativeModel, GoogleAIBackend} from "firebase/ai";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -25,4 +25,12 @@ export const firebaseDb = getFirestore(app, '(default)');
 const ai = getAI(app, { backend: new GoogleAIBackend() });
 
 // Create a `GenerativeModel` instance with a model that supports your use case
-export const GeminiAiModel = getGenerativeModel(ai, { model: "gemini-3-flash-preview" });
+export const GeminiAiModel = getGenerativeModel(ai, { model: "gemini-3.1-flash-lite-preview" });
+
+// Create Live Model
+// export const GeminiAiLiveModel = getLiveGenerativeModel(ai, {
+//   model: "gemini-2.5-flash-preview",
+//   generationConfig: {
+//     responseModalities: [ResponseModality.TEXT],
+//   },
+// })

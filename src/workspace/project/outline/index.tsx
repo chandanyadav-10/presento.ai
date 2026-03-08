@@ -1,12 +1,12 @@
 import SlidersStyle, { type DesignStyle } from "@/components/custom/SlidersStyle";
 import { firebaseDb, GeminiAiModel } from "./../../../../config/FirebaseConfig";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import OutlineSection from "@/components/custom/OutlineSection";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2Icon } from "lucide-react";
-import { set } from "date-fns";
+
 
 
 const OUTLINE_PROMPT = `Generate a PowerPoint slide outline for the topic {userInput}". 
@@ -69,12 +69,14 @@ const DUMMY_OUTLINE = [
   },
 ];
 
-type Project = {
+export type Project = {
   userInputPrompt: string;
-  projectId: string;
-  createdAt: string;
-  noOfSliders: string;
-  outline: Outline[];
+  projectId: string,
+  createdAt: string,
+  noOfSliders: string,
+  outline: Outline[],
+  slides: any[],
+  designStyle: DesignStyle
 };
 
 export type Outline = {
@@ -85,11 +87,11 @@ export type Outline = {
 
 function Outline() {
   const { projectId } = useParams();
-  const [projectDetail, setProjectDetail] = useState<Project | null>();
   const [loading, setLoading] = useState(false);
   const [UpdateDbLoading, setUpdateDbLoading] = useState(false);
   const [outline, setOutline] = useState<Outline[]>(DUMMY_OUTLINE);
   const [selectedStyle, setSelectedStyle] = useState<DesignStyle>();
+   const navigate = useNavigate();
 
   useEffect(() => {
     projectId && GetProjectDetail();
@@ -102,9 +104,8 @@ function Outline() {
       return;
     }
     console.log("Document data:", docSnap.data());
-    setProjectDetail(docSnap.data());
     if (!docSnap.data()?.outline) {
-      //  GenerateSLidersOutline(docSnap.data());
+      // GenerateSLidersOutline(docSnap.data());
     }
   };
 
@@ -136,19 +137,25 @@ function Outline() {
     );
   };
 
-  const onGenerateSlider=async()=>{
-    setUpdateDbLoading(true);
-    //update db
-    await setDoc(doc(firebaseDb, "projects", projectId ?? ""),{
-      designStyle: selectedStyle,
-      outline: outline
-    },{
-      merge:true
-    })
-    setUpdateDbLoading(false);
+const onGenerateSlider = async () => {
+  setUpdateDbLoading(true);
 
-    //Naviagte to slider-Editor
-  }
+  await setDoc(
+    doc(firebaseDb, "projects", projectId ?? ""),
+    {
+      designStyle: selectedStyle,
+      outline: outline,
+    },
+    {
+      merge: true,
+    }
+  );
+
+  setUpdateDbLoading(false);
+
+  // ✅ Navigate to editor page
+  navigate(`/workspace/project/${projectId}/editor`);
+};
 
   return (
     <div className="flex justify-center mt-20">

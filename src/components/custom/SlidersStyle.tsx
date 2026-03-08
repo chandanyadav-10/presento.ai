@@ -5,7 +5,6 @@ import DarkSlider from "./../../assets/dark.jpg";
 import PastelSlider from "./../../assets/pastel-ppt.jpg";
 import MinWhiteSlider from "./../../assets/Minimalist-White.jpg";
 import TechSlider from "./../../assets/tech.jpg";
-import { de } from "date-fns/locale";
 
 const Design_Styles = [
   {
