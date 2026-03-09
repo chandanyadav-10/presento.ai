@@ -6,6 +6,17 @@ import { Link, useLocation } from "react-router-dom";
 import { Diamond, Gem } from "lucide-react";
 import { UserDetailContext } from "./../../../context/UserDetailContext";
 
+const MenuOptions = [
+  {
+    name: "Workspace",
+    path: "/workspace",
+  },
+  {
+    name: "Pricing",
+    path: "/pricing",
+  },
+];
+
 function Header() {
   const { user } = useUser();
   const location = useLocation();
@@ -13,8 +24,28 @@ function Header() {
 
   console.log(location.pathname);
   return (
-    <div className="flex items-center justify-between px-10 shadow">
-      <img src={logo} alt="Logo" width={130} height={130} />
+    <div className="flex items-center justify-between px-10 shadow fixed top-0 w-full left-0 z-50 backdrop-blur-md bg-white/80 h-16">
+      {/* Logo */}
+      <img src={logo} alt="Logo" width={120} />
+
+      {/* Center Menu */}
+      <div className="flex gap-8">
+        {MenuOptions.map((menu, index) => (
+          <Link key={index} to={menu.path}>
+            <h2
+              className={`cursor-pointer hover:text-primary transition ${
+                location.pathname === menu.path
+                  ? "text-primary font-semibold"
+                  : "text-gray-700"
+              }`}
+            >
+              {menu.name}
+            </h2>
+          </Link>
+        ))}
+      </div>
+
+      {/* Right Section */}
       {!user ? (
         <SignInButton mode="modal">
           <Button>Get Started</Button>
@@ -22,6 +53,7 @@ function Header() {
       ) : (
         <div className="flex gap-5 items-center">
           <UserButton />
+
           {location.pathname.includes("workspace") ? (
             <div className="flex gap-2 items-center p-2 px-3 bg-orange-100 rounded-full">
               <Gem /> {userDetail?.credits ?? 0}

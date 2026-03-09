@@ -1,6 +1,6 @@
 import OutlineSection from "@/components/custom/OutlineSection";
 import { firebaseDb, GeminiAiModel } from "./../../../../config/FirebaseConfig";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import type { Project } from "../outline";
@@ -87,14 +87,23 @@ function Editor() {
       setLoading(false);
       return;
     }
+    const data = docSnap.data();
 
-    setProjectDetail(docSnap.data());
+    setProjectDetail(data);
+
+    // ✅ Load saved slides if they exist
+    if (data?.slides && data.slides.length > 0) {
+      setSliders(data.slides);
+    }
     setLoading(false);
   };
 
   useEffect(() => {
-    if (projectDetail && sliders.length === 1) {
-      GenerateSlides();
+    if (!projectDetail) return;
+
+    // ❗ Only generate if slides do not exist
+    if (!projectDetail.slides || projectDetail.slides.length === 0) {
+      // GenerateSlides();
     }
   }, [projectDetail]);
 
@@ -159,27 +168,56 @@ function Editor() {
     }
   };
 
-  const updateSliderCode = (updateSlideCode: string, index: number) => {
-    setSliders((prev: any[]) => {
-      const updated = [...prev];
+  const updateSliderCode = async (updatedHTML: string, index: number) => {
+    const updatedSlides = [...sliders];
+    console.log("Saving slides:", updatedSlides);
 
-      updated[index] = {
-        ...updated[index],
-        code: updateSlideCode,
-      };
+    updatedSlides[index] = {
+      ...updatedSlides[index],
+      code: updatedHTML,
+    };
 
-      return updated;
-    });
+    // update UI
+    setSliders(updatedSlides);
+
+    // save to firebase
+    if (!projectId) return;
+
+    await setDoc(
+      doc(firebaseDb, "projects", projectId),
+      {
+        slides: updatedSlides,
+      },
+      { merge: true },
+    );
+  };
+
+  const handleUpdateOutline = async (slideNo: string, value: any) => {
+    const updatedOutline = projectDetail?.outline?.map((item: any) =>
+      item.slideNo === slideNo ? { ...item, ...value } : item,
+    );
+
+    setProjectDetail((prev: any) => ({
+      ...prev,
+      outline: updatedOutline,
+    }));
+
+    // update firebase
+    await setDoc(
+      doc(firebaseDb, "projects", projectId ?? ""),
+      { outline: updatedOutline },
+      { merge: true },
+    );
   };
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="flex flex-col pt-24">
       {/* MAIN CONTENT */}
-      <div className="grid grid-cols-5 px-10 pb-10 mt-6 gap-10 overflow-auto hide-scrollbar">
+      <div className="grid grid-cols-5 px-10 pb-10 gap-10 hide-scrollbar">
         <div className="col-span-2 h-[90vh] overflow-auto hide-scrollbar">
           <OutlineSection
             outline={projectDetail?.outline ?? []}
-            handleUpdateOutline={() => console.log()}
+            handleUpdateOutline={handleUpdateOutline}
             loading={loading}
           />
         </div>
@@ -193,10 +231,11 @@ function Editor() {
               }}
             >
               <SliderFrame
+                key={index}
                 slide={slide}
                 colors={projectDetail?.designStyle?.colors}
-                setUpdateSlider={(updateSlideCode: string) =>
-                  updateSliderCode(updateSlideCode, index)
+                setUpdateSlider={(code: string) =>
+                  updateSliderCode(code, index)
                 }
               />
             </div>

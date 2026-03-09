@@ -38,14 +38,17 @@ function PromptBox() {
       userInputPrompt: userInput,
       createdBy: user?.primaryEmailAddress?.emailAddress,
       createdAt: Date.now(),
-      noOfSlider: noOfSlider
+      noOfSlider: noOfSlider,
     });
     setLoading(false);
     navigate("/workspace/project/" + projectId + "/outline");
   };
 
   return (
-    <div className="w-full flex items-center justify-center mt-28">
+    <div
+      id="create-project"
+      className="w-full flex items-center justify-center mt-28"
+    >
       <div className="flex flex-col items-center justify-center space-y-4">
         <h2 className="font-bold text-4xl">
           Describe your topic, we’ll design the{" "}
@@ -56,6 +59,7 @@ function PromptBox() {
         </p>
         <InputGroup>
           <InputGroupTextarea
+            id="prompt-input"
             placeholder="Enter what kind of slider do you want to create?"
             className="min-h-36"
             onChange={(event) => setUserInput(event.target.value)}
@@ -64,7 +68,7 @@ function PromptBox() {
             {/* <InputGroupButton>
               <PlusIcon />
             </InputGroupButton> */}
-            <Select onValueChange={(value)=> setNoOfSlider(value)}>
+            <Select onValueChange={(value) => setNoOfSlider(value)}>
               <SelectTrigger className="w-full max-w-48">
                 <SelectValue placeholder="Select No Of Sliders" />
               </SelectTrigger>

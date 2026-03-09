@@ -2,6 +2,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { firebaseDb, GeminiAiModel } from "./../../../config/FirebaseConfig";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { ArrowRight, Loader2, Sparkles, X } from "lucide-react";
 
 const HTML_DEFAULT = `<!DOCTYPE html>
 <html lang="en">
@@ -55,7 +56,7 @@ const HTML_DEFAULT = `<!DOCTYPE html>
   <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 
   <!-- Optional: Tooltip & Popover Library (Tippy.js) -->
-  <link rel="stylesheet" href="https://unpkg.com/@popperjs/core@2">
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
   <script src="https://unpkg.com/tippy.js@6/dist/tippy.css"></script>
   <script src="https://unpkg.com/tippy.js@6"></script>
 
@@ -67,25 +68,30 @@ const HTML_DEFAULT = `<!DOCTYPE html>
 `;
 
 type props = {
-  slide: { code: string },
-  colors: any,
-  setUpdateSlider:any
+  slide: { code: string };
+  colors: any;
+  setUpdateSlider: any;
 };
 
 function SliderFrame({ slide, colors, setUpdateSlider }: props) {
-
   const { projectId } = useParams();
-  const FINAL_CODE = HTML_DEFAULT
-    .replace("{colorCodes}", JSON.stringify(colors))
-    .replace("{code}", slide?.code);
+  const FINAL_CODE = HTML_DEFAULT.replace(
+    "{colorCodes}",
+    JSON.stringify(colors),
+  ).replace("{code}", slide?.code);
 
   const iframeRef = useRef<any>(null);
   const [loading, setLoading] = useState(false);
   const selectedELRef = useRef<HTMLElement | null>(null);
-  const [cardPosition, setCardPosition] = useState<{ x: number, y: number } | null>(null)
+  const [cardPosition, setCardPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
-
     if (!iframeRef.current) return;
     const iframe = iframeRef.current;
     const doc = iframeRef.current.contentDocument;
@@ -119,49 +125,55 @@ function SliderFrame({ slide, colors, setUpdateSlider }: props) {
     };
 
     const handleClick = (e: MouseEvent) => {
-      e.stopPropagation(); // ✅ allow editing text inside
-      const target = e.target as HTMLElement;
+      e.stopPropagation();
 
-      if (selectedEL && selectedEL !== target) {
-        selectedEL.style.outline = '';
-        selectedEL.removeAttribute('contenteditable')
-      }
+      const target = (e.target as HTMLElement).closest(
+        "h1,h2,h3,p,span,li,img",
+      ) as HTMLElement;
 
-      selectedEL = target;
-
-      selectedELRef.current = target;
-
-      if (selectedEL && selectedEL !== target) {
+      // ❗ remove previous selection
+      if (selectedEL) {
         selectedEL.style.outline = "";
         selectedEL.removeAttribute("contenteditable");
       }
 
+      // ❗ if clicking empty area → remove toolbar and exit
+      if (!target) {
+        selectedEL = null;
+        selectedELRef.current = null;
+        setCardPosition(null);
+        return;
+      }
+
+      // set new selected element
       selectedEL = target;
+      selectedELRef.current = target;
+
       selectedEL.style.outline = "2px solid blue";
       selectedEL.setAttribute("contenteditable", "true");
       selectedEL.focus();
 
-      console.log("Selected element:", selectedEL);
-      // ✅ Attach blur event dynamically
-      // selectedEL?.addEventListener("blur", handleBlur);
-
-      // ✅ Calculate position relative to iframe container
       const rect = target.getBoundingClientRect();
       const iframeRect = iframe.getBoundingClientRect();
 
       setCardPosition({
         x: iframeRect.left + rect.left + rect.width / 2,
-        y: iframeRect.top + rect.bottom
-      })
-
+        y: iframeRect.top + rect.bottom + 2,
+      });
     };
 
     const handleBlur = () => {
       if (selectedEL) {
         console.log("Final edited element:", selectedEL.outerHTML);
-        const updatedSliderCode = iframe.contentDocument?.body?.innerHTML
-        console.log(updatedSliderCode);
-        setUpdateSlider(updatedSliderCode)
+        const slideRoot = iframe.contentDocument?.querySelector(
+          "div.w-\\[800px\\].h-\\[500px\\]",
+        );
+
+        const updatedSliderCode = slideRoot?.outerHTML || selectedEL.outerHTML;
+
+        if (updatedSliderCode) {
+          setUpdateSlider(updatedSliderCode);
+        }
       }
     };
 
@@ -169,8 +181,10 @@ function SliderFrame({ slide, colors, setUpdateSlider }: props) {
       if (e.key === "Escape" && selectedEL) {
         selectedEL.style.outline = "";
         selectedEL.removeAttribute("contenteditable");
-        selectedEL.removeEventListener("blur", handleBlur);
+
         selectedEL = null;
+        selectedELRef.current = null;
+        setCardPosition(null);
       }
     };
 
@@ -180,6 +194,22 @@ function SliderFrame({ slide, colors, setUpdateSlider }: props) {
       doc.body?.addEventListener("mouseout", handleMouseOut);
       doc.body?.addEventListener("click", handleClick);
       doc.body?.addEventListener("keydown", handleKeyDown);
+      doc.body?.addEventListener("click", (e: MouseEvent) => {
+        const target = (e.target as HTMLElement).closest(
+          "h1,h2,h3,p,span,li,img",
+        );
+
+        if (!target) {
+          if (selectedEL) {
+            selectedEL.style.outline = "";
+            selectedEL.removeAttribute("contenteditable");
+          }
+
+          selectedEL = null;
+          selectedELRef.current = null;
+          setCardPosition(null);
+        }
+      });
     });
 
     // ✅ Cleanup listeners on unmount
@@ -189,11 +219,10 @@ function SliderFrame({ slide, colors, setUpdateSlider }: props) {
       doc.body?.removeEventListener("click", handleClick);
       doc.body?.removeEventListener("keydown", handleKeyDown);
     };
-
   }, [slide?.code]);
 
   const handleAiSectionChange = async (userAiPrompt: string) => {
-    setLoading(true);
+    setAiLoading(true);
     const selectedEL = selectedELRef.current;
     const iframe = iframeRef.current;
 
@@ -231,45 +260,75 @@ ${oldHTML}
           selectedELRef.current = newNode as HTMLElement;
           console.log("✅ Element replaced successfully");
 
-          const updatedSliderCode = iframe.contentDocument?.body?.innerHTML || newHTML
-          console.log(updatedSliderCode);
-          setUpdateSlider(updatedSliderCode)
+          const slideRoot = iframe.contentDocument?.querySelector(
+            "div.w-\\[800px\\].h-\\[500px\\]",
+          );
+
+          const updatedSliderCode = slideRoot?.outerHTML;
+
+          if (updatedSliderCode) {
+            setUpdateSlider(updatedSliderCode);
+          }
         }
       }
-
     } catch (err) {
       console.error("AI generation failed:", err);
     }
-
-    setLoading(false);
-  }
-
-  // ✅ Save slides to Firebase
-  const SaveAllSlides = async (updatedSlides: any[]) => {
-    if (!projectId) return;
-    await setDoc(
-      doc(firebaseDb, "projects", projectId),
-      { slides: updatedSlides },
-      { merge: true }
-    );
-    console.log("✅ Slides updated to Firestore");
+    setAiLoading(false);
+    setAiPrompt("");
   };
 
   return (
-    <div className="mb-8 flex justify-center">
+    <div className="mb-8 flex justify-center relative">
+      <div className="relative w-full max-w-[900px] aspect-video bg-white rounded-2xl shadow-lg overflow-hidden">
+        <iframe
+          ref={iframeRef}
+          className="absolute top-0 left-0 w-[800px] h-[500px] border-0 scale-[0.9] origin-top-left"
+          sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups"
+        />
+      </div>
 
-  <div className="relative w-full max-w-[900px] aspect-video bg-white rounded-2xl shadow-lg overflow-hidden">
+      {/* AI INLINE TOOLBAR */}
+      {cardPosition && (
+        <div
+          className="fixed flex items-center gap-2 bg-white rounded-xl shadow-lg px-3 py-2"
+          style={{
+            top: cardPosition.y - 17,
+            left: cardPosition.x - 140,
+            zIndex: 9999,
+          }}
+        >
+          <Sparkles size={16} className="text-gray-500" />
 
-    <iframe
-      ref={iframeRef}
-      className="absolute top-0 left-0 w-[800px] h-[500px] border-0 scale-[0.9] origin-top-left"
-      sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups"
-    />
+          <input
+            className="outline-none text-sm w-28"
+            placeholder="Edit with AI"
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+          />
 
-  </div>
+          {aiLoading ? (
+            <Loader2 size={18} className="animate-spin text-gray-500" />
+          ) : (
+            <ArrowRight
+              size={18}
+              className="cursor-pointer text-black"
+              onClick={() => handleAiSectionChange(aiPrompt)}
+            />
+          )}
 
-</div>
-  )
+          <X
+            size={18}
+            className="cursor-pointer text-gray-500"
+            onClick={() => {
+              setAiPrompt("");
+              setCardPosition(null);
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default SliderFrame;

@@ -6,9 +6,9 @@ import { ArrowRight, Edit, Ghost, Sparkle } from "lucide-react";
 import EditOutlineDialog from "./EditOutlineDialog";
 
 type Props = {
-  loading: boolean,
-  outline: Outline[],
-  handleUpdateOutline: any
+  loading: boolean;
+  outline: Outline[];
+  handleUpdateOutline: any;
 };
 
 function OutlineSection({ loading, outline, handleUpdateOutline }: Props) {
@@ -30,7 +30,7 @@ function OutlineSection({ loading, outline, handleUpdateOutline }: Props) {
         {outline?.map((item, index) => (
           <div
             key={index}
-            className="bg-white p-3 rounded-xl flex gap-6 items-center border mt-5 justify-between px-6"
+            className="bg-white shadow-md border p-3 rounded-xl flex gap-6 items-center mt-5 justify-between px-6"
           >
             <div className="flex gap-6 items-center">
               <h2 className="font-bold p-5 bg-gray-200 rounded-xl">
@@ -41,13 +41,17 @@ function OutlineSection({ loading, outline, handleUpdateOutline }: Props) {
                 <p className="text-gray-500">{item.outline}</p>
               </div>
             </div>
-            <EditOutlineDialog outlineData={item} onUpdate={handleUpdateOutline}>
-              <Button variant={"ghost"} size={"icon-lg"}><Edit /></Button>
+            <EditOutlineDialog
+              outlineData={item}
+              onUpdate={handleUpdateOutline}
+            >
+              <Button variant={"ghost"} size={"icon-lg"}>
+                <Edit />
+              </Button>
             </EditOutlineDialog>
           </div>
         ))}
       </div>
-     
     </div>
   );
 }
