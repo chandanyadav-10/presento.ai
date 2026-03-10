@@ -3,7 +3,6 @@
 @import "shadcn/tailwind.css";
 
 
-
 /* Hide scrollbar but keep scrolling */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
