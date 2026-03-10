@@ -11,7 +11,7 @@ import MyProjects from "@/components/custom/MyProjects";
 
 function Workspace() {
   const { user, isLoaded } = useUser();
-  const { userDetail, setUserDetail } = useContext(UserDetailContext);
+  const { setUserDetail } = useContext(UserDetailContext);
   const location = useLocation();
 
   useEffect(() => {

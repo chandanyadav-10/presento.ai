@@ -1,6 +1,5 @@
 import { GeminiAiModel } from "./../../../config/FirebaseConfig";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 import { ArrowRight, Loader2, Sparkles, X } from "lucide-react";
 
 const HTML_DEFAULT = `<!DOCTYPE html>

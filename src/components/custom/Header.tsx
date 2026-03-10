@@ -1,4 +1,4 @@
-import {useContext } from "react";
+import { useContext } from "react";
 import logo from "../../assets/logo.png";
 import { Button } from "../ui/button";
 import { SignInButton, useAuth, UserButton, useUser } from "@clerk/clerk-react";
@@ -20,7 +20,7 @@ const MenuOptions = [
 function Header() {
   const { user } = useUser();
   const location = useLocation();
-  const { userDetail, setUserDetail } = useContext(UserDetailContext);
+  const { userDetail } = useContext(UserDetailContext);
 
   console.log(location.pathname);
   const { has } = useAuth();
