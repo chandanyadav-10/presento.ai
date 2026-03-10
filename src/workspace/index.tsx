@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/clerk-react";
-import React, { use, useContext, useEffect } from "react";
+import {useContext, useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { firebaseDb } from "./../../config/FirebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { UserDetailContext } from "./../../context/UserDetailContext";
-import { set } from "date-fns";
 import Header from "@/components/custom/Header";
 import PromptBox from "@/components/custom/PromptBox";
 import MyProjects from "@/components/custom/MyProjects";

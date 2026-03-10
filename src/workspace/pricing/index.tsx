@@ -1,9 +1,8 @@
 import { PricingTable } from "@clerk/clerk-react";
-import React from "react";
 
 function Pricing() {
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-gradient-to-b from-indigo-50 via-white to-white">
+    <div className="min-h-screen pt-24 pb-20 bg-linear-to-b from-indigo-50 via-white to-white">
 
       {/* Title Section */}
       <div className="text-center mb-14">

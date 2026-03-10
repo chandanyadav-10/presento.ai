@@ -1,9 +1,9 @@
-import React, { use, useContext } from "react";
+import {useContext } from "react";
 import logo from "../../assets/logo.png";
 import { Button } from "../ui/button";
 import { SignInButton, useAuth, UserButton, useUser } from "@clerk/clerk-react";
 import { Link, useLocation } from "react-router-dom";
-import { Diamond, Gem } from "lucide-react";
+import { Gem } from "lucide-react";
 import { UserDetailContext } from "./../../../context/UserDetailContext";
 
 const MenuOptions = [

@@ -1,8 +1,8 @@
-import React from "react";
+
 import { Skeleton } from "../ui/skeleton";
 import type { Outline } from "@/workspace/project/outline";
 import { Button } from "../ui/button";
-import { ArrowRight, Edit, Ghost, Sparkle } from "lucide-react";
+import {Edit} from "lucide-react";
 import EditOutlineDialog from "./EditOutlineDialog";
 
 type Props = {
@@ -17,10 +17,10 @@ function OutlineSection({ loading, outline, handleUpdateOutline }: Props) {
       <h2 className="font-bold text-xl">Sliders Outline</h2>
       {loading && (
         <div>
-          {[1, 2, 3, 4, 5].map((item, index) => (
+          {[1, 2, 3, 4, 5].map((index) => (
             <Skeleton
               key={index}
-              className="h-[60px] w-full rounded-2xl mb-4"
+              className="h-15 w-full rounded-2xl mb-4"
             />
           ))}
         </div>

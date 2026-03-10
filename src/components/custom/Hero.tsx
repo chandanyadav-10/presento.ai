@@ -1,5 +1,4 @@
 import { Play } from "lucide-react";
-import React from "react";
 import { Button } from "../ui/button";
 import { HeroVideoDialog } from "../ui/hero-video-dialog";
 import { SignInButton, useUser } from "@clerk/clerk-react";

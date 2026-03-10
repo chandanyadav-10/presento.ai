@@ -1,6 +1,5 @@
-import { doc, setDoc } from "firebase/firestore";
-import { firebaseDb, GeminiAiModel } from "./../../../config/FirebaseConfig";
-import React, { useEffect, useRef, useState } from "react";
+import { GeminiAiModel } from "./../../../config/FirebaseConfig";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ArrowRight, Loader2, Sparkles, X } from "lucide-react";
 
@@ -74,14 +73,12 @@ type props = {
 };
 
 function SliderFrame({ slide, colors, setUpdateSlider }: props) {
-  const { projectId } = useParams();
   const FINAL_CODE = HTML_DEFAULT.replace(
     "{colorCodes}",
     JSON.stringify(colors),
   ).replace("{code}", slide?.code);
 
   const iframeRef = useRef<any>(null);
-  const [loading, setLoading] = useState(false);
   const selectedELRef = useRef<HTMLElement | null>(null);
   const [cardPosition, setCardPosition] = useState<{
     x: number;
@@ -162,20 +159,20 @@ function SliderFrame({ slide, colors, setUpdateSlider }: props) {
       });
     };
 
-    const handleBlur = () => {
-      if (selectedEL) {
-        console.log("Final edited element:", selectedEL.outerHTML);
-        const slideRoot = iframe.contentDocument?.querySelector(
-          "div.w-\\[800px\\].h-\\[500px\\]",
-        );
+    // const handleBlur = () => {
+    //   if (selectedEL) {
+    //     console.log("Final edited element:", selectedEL.outerHTML);
+    //     const slideRoot = iframe.contentDocument?.querySelector(
+    //       "div.w-\\[800px\\].h-\\[500px\\]",
+    //     );
 
-        const updatedSliderCode = slideRoot?.outerHTML || selectedEL.outerHTML;
+    //     const updatedSliderCode = slideRoot?.outerHTML || selectedEL.outerHTML;
 
-        if (updatedSliderCode) {
-          setUpdateSlider(updatedSliderCode);
-        }
-      }
-    };
+    //     if (updatedSliderCode) {
+    //       setUpdateSlider(updatedSliderCode);
+    //     }
+    //   }
+    // };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && selectedEL) {
