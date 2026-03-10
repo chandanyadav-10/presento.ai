@@ -37,7 +37,7 @@ function Workspace() {
           fullName: user?.fullName,
           email: user?.primaryEmailAddress?.emailAddress,
           createdAt: new Date(),
-          credits: 10,
+          credits: 5,
         };
         // insert new user
         await setDoc(
@@ -70,7 +70,7 @@ function Workspace() {
       <Header />
       {location.pathname === "/workspace" && <div>
         <PromptBox />
-        <MyProjects />
+        <MyProjects /> 
         </div>}
       <Outlet />
     </div>

@@ -1,7 +1,7 @@
 import React, { use, useContext } from "react";
 import logo from "../../assets/logo.png";
 import { Button } from "../ui/button";
-import { SignInButton, UserButton, useUser } from "@clerk/clerk-react";
+import { SignInButton, useAuth, UserButton, useUser } from "@clerk/clerk-react";
 import { Link, useLocation } from "react-router-dom";
 import { Diamond, Gem } from "lucide-react";
 import { UserDetailContext } from "./../../../context/UserDetailContext";
@@ -13,7 +13,7 @@ const MenuOptions = [
   },
   {
     name: "Pricing",
-    path: "/pricing",
+    path: "/workspace/pricing",
   },
 ];
 
@@ -23,8 +23,11 @@ function Header() {
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
 
   console.log(location.pathname);
+  const { has } = useAuth();
+  const hasUnlimitedAccess = has && has({ plan: "unlimited" });
+  console.log("hasUnlimitedAccess", hasUnlimitedAccess);
   return (
-    <div className="flex items-center justify-between px-10 shadow fixed top-0 w-full left-0 z-50 backdrop-blur-md bg-white/80 h-16">
+    <div className="flex items-center justify-between px-10 shadow-md fixed top-0 w-full left-0 z-50 backdrop-blur-md bg-white/70 border-amber-600 h-16">
       {/* Logo */}
       <img src={logo} alt="Logo" width={120} />
 
@@ -55,9 +58,11 @@ function Header() {
           <UserButton />
 
           {location.pathname.includes("workspace") ? (
-            <div className="flex gap-2 items-center p-2 px-3 bg-orange-100 rounded-full">
-              <Gem /> {userDetail?.credits ?? 0}
-            </div>
+            !hasUnlimitedAccess && (
+              <div className="flex gap-2 items-center p-2 px-3 bg-orange-100 rounded-full">
+                <Gem /> {userDetail?.credits ?? 0}
+              </div>
+            )
           ) : (
             <Link to="/workspace">
               <Button>Go To Workspace</Button>

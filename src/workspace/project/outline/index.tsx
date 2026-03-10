@@ -1,13 +1,16 @@
-import SlidersStyle, { type DesignStyle } from "@/components/custom/SlidersStyle";
+import SlidersStyle, {
+  type DesignStyle,
+} from "@/components/custom/SlidersStyle";
 import { firebaseDb, GeminiAiModel } from "./../../../../config/FirebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import OutlineSection from "@/components/custom/OutlineSection";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2Icon } from "lucide-react";
-
-
+import { UserDetailContext } from "./../../../../context/UserDetailContext";
+import CreaditLimitDialog from "@/components/custom/CreaditLimitDialog";
+import { useAuth } from "@clerk/clerk-react";
 
 const OUTLINE_PROMPT = `Generate a PowerPoint slide outline for the topic {userInput}". 
 Create {noOfSliders} slides in total. Each slide should include a topic name and a 2-line descriptive outline that clearly explains what content the slide will cover.
@@ -71,12 +74,12 @@ const DUMMY_OUTLINE = [
 
 export type Project = {
   userInputPrompt: string;
-  projectId: string,
-  createdAt: string,
-  noOfSliders: string,
-  outline: Outline[],
-  slides: any[],
-  designStyle: DesignStyle
+  projectId: string;
+  createdAt: string;
+  noOfSliders: string;
+  outline: Outline[];
+  slides: any[];
+  designStyle: DesignStyle;
 };
 
 export type Outline = {
@@ -89,9 +92,13 @@ function Outline() {
   const { projectId } = useParams();
   const [loading, setLoading] = useState(false);
   const [UpdateDbLoading, setUpdateDbLoading] = useState(false);
+  const { userDetail, setUserDetail } = useContext(UserDetailContext);
   const [outline, setOutline] = useState<Outline[]>(DUMMY_OUTLINE);
   const [selectedStyle, setSelectedStyle] = useState<DesignStyle>();
-   const navigate = useNavigate();
+  const [openAlert, setOpenAlert] = useState(false);
+  const navigate = useNavigate();
+  const { has } = useAuth();
+  const hasUnlimitedAccess = has && has({ plan: "unlimited" });
 
   useEffect(() => {
     projectId && GetProjectDetail();
@@ -105,7 +112,7 @@ function Outline() {
     }
     console.log("Document data:", docSnap.data());
     if (!docSnap.data()?.outline) {
-      // GenerateSLidersOutline(docSnap.data());
+      GenerateSLidersOutline(docSnap.data());
     }
   };
 
@@ -137,31 +144,51 @@ function Outline() {
     );
   };
 
-const onGenerateSlider = async () => {
-  setUpdateDbLoading(true);
-
-  await setDoc(
-    doc(firebaseDb, "projects", projectId ?? ""),
-    {
-      designStyle: selectedStyle,
-      outline: outline,
-    },
-    {
-      merge: true,
+  const onGenerateSlider = async () => {
+    if (userDetail?.creadits <= 0 && !hasUnlimitedAccess) {
+      //alert dialog
+      setOpenAlert(true);
+      return;
     }
-  );
+    setUpdateDbLoading(true);
+    await setDoc(
+      doc(firebaseDb, "projects", projectId ?? ""),
+      {
+        designStyle: selectedStyle,
+        outline: outline,
+      },
+      {
+        merge: true,
+      },
+    );
+    !hasUnlimitedAccess && await setDoc(
+      doc(firebaseDb, "users", userDetail?.email ?? ""),
+      {
+        creadits: userDetail?.creadit - 1,
+      },
+      {
+        merge: true,
+      },
+    );
 
-  setUpdateDbLoading(false);
+    !hasUnlimitedAccess && setUserDetail((prev: any) => ({
+      ...prev,
+      creadits: userDetail?.credits - 1,
+    }));
 
-  // ✅ Navigate to editor page
-  navigate(`/workspace/project/${projectId}/editor`);
-};
+    setUpdateDbLoading(false);
+
+    // ✅ Navigate to editor page
+    navigate(`/workspace/project/${projectId}/editor`);
+  };
 
   return (
     <div className="flex justify-center mt-20">
       <div className="max-w-3xl w-full ">
         <h2 className="font-bold text-2xl">Settings and Slider Outline</h2>
-        <SlidersStyle selectStyle={(value:DesignStyle)=>setSelectedStyle(value)}/>
+        <SlidersStyle
+          selectStyle={(value: DesignStyle) => setSelectedStyle(value)}
+        />
         <OutlineSection
           loading={loading}
           outline={outline || []}
@@ -170,13 +197,16 @@ const onGenerateSlider = async () => {
           }
         />
       </div>
-       <Button size={'lg'} className="fixed bottom-6 transform left-1/2 -translate-x-1/2" 
-       onClick={onGenerateSlider}
-       disabled={UpdateDbLoading || loading}
-       >
-        {UpdateDbLoading && <Loader2Icon className="animate-spin"/>}
+      <Button
+        size={"lg"}
+        className="fixed bottom-6 transform left-1/2 -translate-x-1/2"
+        onClick={onGenerateSlider}
+        disabled={UpdateDbLoading || loading}
+      >
+        {UpdateDbLoading && <Loader2Icon className="animate-spin" />}
         Generate Sliders <ArrowRight />
       </Button>
+      <CreaditLimitDialog openAlert={openAlert} setOpenAlert={setOpenAlert} />
     </div>
   );
 }
