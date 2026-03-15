@@ -112,7 +112,7 @@ function Outline() {
     }
     console.log("Document data:", docSnap.data());
     if (!docSnap.data()?.outline) {
-      GenerateSLidersOutline(docSnap.data());
+      // GenerateSLidersOutline(docSnap.data());
     }
   };
 

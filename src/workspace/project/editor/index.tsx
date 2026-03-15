@@ -103,7 +103,7 @@ function Editor() {
 
     // ❗ Only generate if slides do not exist
     if (!projectDetail.slides || projectDetail.slides.length === 0) {
-      GenerateSlides();
+      // GenerateSlides();
     }
   }, [projectDetail]);
 

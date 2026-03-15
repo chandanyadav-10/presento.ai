@@ -5,7 +5,7 @@ import {
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
-import { ArrowUp, Loader2Icon} from "lucide-react";
+import { ArrowUp, Loader2Icon } from "lucide-react";
 import {
   Select,
   SelectContent,
